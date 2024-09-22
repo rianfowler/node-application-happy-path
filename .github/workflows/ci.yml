@@ -17,10 +17,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Get short SHA
-        id: vars
-        run: echo "short_sha=${GITHUB_SHA::0:7}" >> $GITHUB_OUTPUT
-
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -34,6 +30,6 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${{ steps.vars.outputs.short_sha }}
+            ghcr.io/${{ github.repository }}:${GITHUB_SHA}
             ghcr.io/${{ github.repository }}:latest
           builder: paketobuildpacks/builder:full
