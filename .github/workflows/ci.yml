@@ -36,3 +36,23 @@ jobs:
       - name: Push image
         run: |
           docker push ghcr.io/${{ github.repository }}:${{ github.sha }}
+
+      - name: Create GitHub Deployment
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { data: deployment } = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.ref,
+              required_contexts: [],
+              environment: 'development',
+              description: 'Deploying to development environment',
+              auto_merge: false,
+              transient_environment: false,
+              production_environment: false,
+              payload: JSON.stringify({
+                image: `ghcr.io/${{ github.repository }}:${{ github.sha }}`
+              })
+            });
+            core.setOutput('deployment_id', deployment.id);
