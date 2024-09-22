@@ -32,4 +32,4 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}:${GITHUB_SHA}
             ghcr.io/${{ github.repository }}:latest
-          builder: paketobuildpacks/builder:full
+          builder: gcr.io/paketo-buildpacks/builder:full
