@@ -31,7 +31,7 @@ jobs:
           image: ghcr.io/${{ github.repository }}
           tag: ${{ github.sha }}
           path: '.'
-          builder: 'gcr.io/paketo-buildpacks/builder-jammy-full'
+          builder: 'gcr.io/paketo-buildpacks/builder:base'
 
       - name: Push image
         run: |
