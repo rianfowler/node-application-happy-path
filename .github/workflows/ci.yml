@@ -11,14 +11,11 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Optional: Install dependencies and run tests
       - name: Install dependencies
         run: npm install
-
-      - name: Run tests (if applicable)
-        run: npm test # Optional step, modify/remove if needed
 
       - name: Get short SHA
         id: vars
