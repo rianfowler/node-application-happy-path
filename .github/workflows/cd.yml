@@ -1,0 +1,67 @@
+name: Deploy to Development Environment
+
+on:
+  deployment:
+    types: [created]
+
+permissions:
+  contents: read
+  deployments: write  # Grant permission to update deployment status
+
+jobs:
+  deploy:
+    name: Deploy to Development Environment
+    runs-on: ubuntu-latest
+    if: ${{ github.event.deployment.environment == 'development' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Humanitec CLI
+        uses: humanitec/setup-cli-action@v1
+        with:
+          version: "0.17.0"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get Image Tag from Deployment Payload
+        run: |
+          echo "IMAGE_TAG=${{ fromJSON(github.event.deployment.payload).image }}" >> $GITHUB_ENV
+
+      - name: Update Score File with Image Tag
+        run: |
+          sed -i 's|IMAGE_TAG_PLACEHOLDER|${IMAGE_TAG}|g' clubhouse-config.yaml
+
+      - name: Deploy to Development Environment
+        env:
+          HUMANITEC_TOKEN: ${{ secrets.HUMANITEC_API_TOKEN }}
+        run: |
+          humctl login --token $HUMANITEC_TOKEN
+          humctl apply -o <your-organization> -a <your-application> -e development -f clubhouse-config.yaml
+
+      - name: Set deployment status to success
+        if: ${{ success() }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: context.payload.deployment.id,
+              state: 'success',
+              environment: context.payload.deployment.environment,
+              environment_url: 'https://your-app-url.com'  # Optional
+            });
+
+      - name: Set deployment status to failure
+        if: ${{ failure() }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: context.payload.deployment.id,
+              state: 'failure',
+              environment: context.payload.deployment.environment
+            });
