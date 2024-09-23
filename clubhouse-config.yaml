@@ -1,0 +1,15 @@
+apiVersion: score.dev/v1b1
+metadata:
+  name: my-application
+resources:
+  my-app:
+    type: docker-image
+    spec:
+      image: IMAGE_TAG_PLACEHOLDER
+      port: 3000
+environments:
+  development:
+    resources:
+      my-app:
+        spec:
+          replicas: 2
